@@ -1,0 +1,31 @@
+# PDF lecture slides
+data/pdfs/*.pdf
+
+# FAISS index
+data/faiss_index/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+plan.md
