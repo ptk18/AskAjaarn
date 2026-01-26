@@ -4,10 +4,6 @@
 
 Local RAG study bot for Intro to Logic course using Ollama, LangChain, and FAISS.
 
-## Credits
-
-Full credits to **Professor Dr. Natthapong Jungteerapanich** from King Mongkut's Institute of Technology Ladkrabang (KMITL) for his comprehensive Intro to Logic lecture slides that serve as the knowledge base for this application.
-
 ## Architecture
 
 ![RAG Pipeline](images/RAG_pipeline.png)
