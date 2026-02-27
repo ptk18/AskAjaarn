@@ -5,6 +5,7 @@ from src.rag import get_llm
 from src.retrieve import retrieve_chunks, format_context
 
 
+# Prompt for generating practice exam questions from retrieved context
 QUIZ_PROMPT = """You are creating an exam for an "Intro to Logic" course. Generate {num_questions} exam-style questions based ONLY on the provided context.
 
 Rules:
@@ -22,6 +23,7 @@ Topic: {topic}
 Generate {num_questions} questions:"""
 
 
+# Prompt for generating Q/A flashcards from retrieved context
 FLASHCARD_PROMPT = """You are creating study flashcards for an "Intro to Logic" course. Generate flashcards based ONLY on the provided context.
 
 Rules:
@@ -44,6 +46,8 @@ Source: [citation]
 
 
 def generate_quiz(topic: str, num_questions: int = 5) -> Dict:
+    """Retrieve chunks for a topic and generate exam-style questions."""
+    # Use more chunks (k=8) to give the LLM richer context for quiz generation
     chunks = retrieve_chunks(topic, k=8)
 
     if not chunks:
@@ -76,6 +80,7 @@ def generate_quiz(topic: str, num_questions: int = 5) -> Dict:
 
 
 def generate_flashcards(topic: str) -> Dict:
+    """Retrieve chunks for a topic and generate study flashcards."""
     chunks = retrieve_chunks(topic, k=8)
 
     if not chunks:
@@ -96,6 +101,7 @@ def generate_flashcards(topic: str) -> Dict:
     prompt = prompt_template.format(context=context, topic=topic)
     flashcards_text = llm.invoke(prompt)
 
+    # Parse the LLM's text output into structured flashcard dicts
     flashcards = parse_flashcards(flashcards_text)
     sources = [{"source": c["source"], "page": c["page"]} for c in chunks]
 
@@ -107,6 +113,7 @@ def generate_flashcards(topic: str) -> Dict:
 
 
 def parse_flashcards(text: str) -> List[Dict]:
+    """Parse LLM output text into a list of {question, answer, source} dicts."""
     cards = []
     current_card = {}
 
@@ -114,6 +121,7 @@ def parse_flashcards(text: str) -> List[Dict]:
         line = line.strip()
 
         if line.startswith("Q:"):
+            # New card starts — save the previous one if exists
             if current_card:
                 cards.append(current_card)
             current_card = {"question": line[2:].strip()}
@@ -125,9 +133,11 @@ def parse_flashcards(text: str) -> List[Dict]:
             current_card["source"] = line[7:].strip()
 
         elif line == "---" and current_card:
+            # Separator between cards
             cards.append(current_card)
             current_card = {}
 
+    # Don't lose the last card if there's no trailing "---"
     if current_card and "question" in current_card:
         cards.append(current_card)
 
@@ -135,4 +145,5 @@ def parse_flashcards(text: str) -> List[Dict]:
 
 
 def export_flashcards_json(flashcards: List[Dict]) -> str:
+    """Convert flashcards list to JSON string for download/export."""
     return json.dumps(flashcards, indent=2)

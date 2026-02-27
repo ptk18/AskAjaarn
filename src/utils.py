@@ -5,6 +5,7 @@ from src.config import OLLAMA_BASE_URL, LLM_MODEL, EMBED_MODEL
 
 
 def check_ollama_running() -> bool:
+    """Ping Ollama to see if the server is up."""
     try:
         response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
         return response.status_code == 200
@@ -13,6 +14,7 @@ def check_ollama_running() -> bool:
 
 
 def check_model_exists(model_name: str) -> bool:
+    """Check if a specific model is downloaded in Ollama."""
     try:
         response = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
         if response.status_code == 200:
@@ -24,6 +26,7 @@ def check_model_exists(model_name: str) -> bool:
 
 
 def verify_environment() -> dict:
+    """Check if Ollama is running and both models (LLM + embedding) are available."""
     results = {
         "ollama_running": check_ollama_running(),
         "llm_exists": False,
@@ -38,11 +41,13 @@ def verify_environment() -> dict:
 
 
 def generate_chunk_id(text: str, metadata: dict) -> str:
+    """Create a deterministic ID from chunk content + metadata (for deduplication)."""
     content = f"{metadata.get('source', '')}{metadata.get('page', '')}{text}"
     return hashlib.md5(content.encode()).hexdigest()
 
 
 def format_sources(sources: list) -> str:
+    """Deduplicate sources and format them as '[file.pdf p.X], [file.pdf p.Y]'."""
     unique_sources = {}
     for src in sources:
         key = (src.get("source", ""), src.get("page", ""))
